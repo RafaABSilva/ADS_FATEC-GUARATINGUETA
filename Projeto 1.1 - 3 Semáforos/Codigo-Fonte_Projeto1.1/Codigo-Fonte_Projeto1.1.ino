@@ -1,7 +1,7 @@
 void setup() {
   //Definindo as Portas e os parâmetros das mesmas
 
-  //Semaforo (Rua) [SR]
+  //Semaforo 0 (Rua) [SR]
   pinMode(13, OUTPUT); // Vermelho
   pinMode(12, OUTPUT); // Amarelo
   pinMode(11, OUTPUT); // Verde
