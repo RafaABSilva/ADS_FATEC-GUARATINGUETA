@@ -1,6 +1,6 @@
 //Declaração das Variáveis
 int buzzer=10;
-int led=13;
+int led=7;
 
 void setup() {
     pinMode(buzzer,OUTPUT); //Definindo o tipo da porta
