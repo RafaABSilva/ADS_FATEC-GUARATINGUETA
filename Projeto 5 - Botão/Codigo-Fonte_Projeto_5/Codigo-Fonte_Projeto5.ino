@@ -9,10 +9,9 @@ void loop() {
   int estado = digitalRead(botao);
 
   if(estado == HIGH ){
-  Serial.println("pressionado");
+  Serial.println("Pressionado");
   }
   else{
-    Serial.println("não pressionado");
+    Serial.println("Não pressionado");
   }
-
 }
