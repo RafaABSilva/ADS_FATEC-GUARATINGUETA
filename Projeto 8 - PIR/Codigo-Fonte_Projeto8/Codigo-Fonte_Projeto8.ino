@@ -8,7 +8,7 @@ void setup() {
 void loop() {
   int acionamento = digitalRead(PIR);
   
-  if(acionamento== HIGH){
+  if(acionamento == HIGH){
     Serial.println("Ladrão!!");
   }else{
     Serial.println("Ninguém");
