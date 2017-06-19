@@ -21,9 +21,9 @@
     int relayTipo = 1;
     int botao01 = 13;
     int botao02 = 12;
-    int relay = 8;
+    int relay = 10;
     int tempSet = -9;
-    int sensorO = 7;
+    int sensorO = 9;
     int menu= 1;
     int b1Estado;
     int b2Estado;
