@@ -72,7 +72,7 @@ void setup(){
     pinMode(relay, OUTPUT);
 
    
-    if(menu==0){      //Menu de Configuração (MENU 0)
+    if(menu==0){      //Menu de Config. (MENU 0)
         //Escrevendo o primeiro Setor
         lcd.setCursor(0,0);
         lcd.print("Temp:");
@@ -89,7 +89,6 @@ void setup(){
         lcd.setCursor(8,1);
         lcd.write(2);
 
-        //MENU de Apresentação (MENU 1)
         lcd.setCursor(2,0);
         lcd.print("Temperatura:");
         lcd.setCursor(6,1);
@@ -147,7 +146,7 @@ void loop(){
           
          lcd.clear();
          
-         if(menu==0 ){     //MENU de Apresentação (MENU 0)     
+         if(menu==0 ){     //MENU de Config. (MENU 0)     
              //Escrevendo o Primeiro Setor
              lcd.setCursor(0,0);
              lcd.print("Temp:");
@@ -203,7 +202,7 @@ void loop(){
              lcd.print("<  >");
              porta=false;
              
-         }else{     //MENU de Apresentação (MENU 0)
+         }else{     //MENU de Apresentação (MENU 1)
              //Escrevendo o Segundo Setor
              lcd.setCursor(2,0);
              lcd.print("Temperatura:");
@@ -234,10 +233,9 @@ void loop(){
                            lcd.print("*DHT11");
                            relayControl=true;
                            respErro = false;
-                           return;
                        }
                    }else{     //Funcionamento Normal
-                       if(respErro==false){
+                       if(respErro==false || erro==true){
                           lcd.clear();
                           respErro = true;
                           erro = false;
