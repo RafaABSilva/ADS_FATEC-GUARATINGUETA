@@ -154,7 +154,7 @@ void loop(){
              lcd.write(2);
 
              //Adequação da interface com base na temperatura padrão
-             if(tempSet<10 && tempSet>=0){     //Para temps de 0 a 9
+             if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
                   lcd.setCursor(12,0);
                   lcd.print(" ");   
                   lcd.setCursor(13,0);
@@ -163,7 +163,7 @@ void loop(){
                   lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else if(tempSet>=-9 && tempSet<0){     //Para temps de 0 a 9
+             }else if(tempSet>=-9 && tempSet<0){     //Para temps. de 0 a 9
                   lcd.setCursor(11,0);
                   lcd.print(" ");   
                   lcd.setCursor(12,0);
@@ -172,14 +172,14 @@ void loop(){
                   lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else if(tempSet<=-10){     //Para temps menores que -10 
+             }else if(tempSet<=-10){     //Para temps. menores que -10 
                   lcd.setCursor(11,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
                   lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else{     //Para as demais temps
+             }else{     //Para as demais temps.
                   lcd.setCursor(12,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
@@ -211,23 +211,24 @@ void loop(){
               if(controle==false){
                    tempEXT = dht.readTemperature();
 
-                   if (isnan(tempEXT)) {
+                   if (isnan(tempEXT)) {     //Em caso de Falha do Sensor DHT
                        Serial.println("Falha ao Ler o Sensor DHT!");
                        lcd.setCursor(0,0);
                        lcd.print("Ferrou!");
                        return;
-                   }else{
+                   }else{     //Funcionamento Normal
                        Serial.print("Temperatura: ");
                        Serial.print(tempEXT);
                        Serial.print(" ºC\n");
 
+                       //Atualizando a temp no LCD
                        if(menu==0){
                            lcd.setCursor(0,0);
                            lcd.print("Temp:");
                            lcd.setCursor(0,1);
                            lcd.print(tempEXT);
                            lcd.setCursor(2,1);
-                           lcd.write(1); //Escreve o simbolo de grau
+                           lcd.write(1);
                            lcd.setCursor(3,1);
                            lcd.print("C ");
                            controle=true;
@@ -237,7 +238,7 @@ void loop(){
                            lcd.setCursor(6,1);
                            lcd.print(tempEXT);
                            lcd.setCursor(8,1);
-                           lcd.write(1); //Escreve o simbolo de grau
+                           lcd.write(1);
                            lcd.setCursor(9,1);
                            lcd.print("C ");
                            controle=true;
@@ -248,35 +249,36 @@ void loop(){
              }
              tempo=millis();
        }
-
+       
+       //Detectando os estados dos botões
        b1Estado = digitalRead(botao01);
        b2Estado = digitalRead(botao02);
   
        if(b1Estado == HIGH){
              if(menu==0){
-                Serial.print("b1 ape\n");
+                Serial.print("Botao 01 -> Temp. Padrao Reduzida\n");
                 tempSet--;
-                if(tempSet<10 && tempSet>=0){
+                if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
                      lcd.setCursor(12,0);
                      lcd.print(" ");
                      lcd.setCursor(13,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");   
-                }else if(tempSet<-9){
+                }else if(tempSet<-9){     //Para temps. menores que -10 
                      lcd.setCursor(11,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
-                }else{
+                }else{     //Para as demais temps.
                      lcd.setCursor(12,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
                 }
@@ -288,38 +290,38 @@ void loop(){
   
        if(b2Estado == HIGH ){
              if(menu==0){
-                Serial.print("b2 ape\n");
+                Serial.print("Botao 02 -> Temp. Padrao Aumentada\n");
                 tempSet++;
-                if(tempSet<10 && tempSet>=0){
+                if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
                      lcd.setCursor(12,0);
                      lcd.print(" ");   
                      lcd.setCursor(13,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
-                }else if(tempSet>=-9 && tempSet<0){
+                }else if(tempSet>=-9 && tempSet<0){     //Para temps. de -9 a -1
                      lcd.setCursor(11,0);
                      lcd.print(" ");   
                      lcd.setCursor(12,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
-                }else if(tempSet<=-10){ 
+                }else if(tempSet<=-10){     //Para temps. menores que -10 
                      lcd.setCursor(11,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
-                }else{
+                }else{     //Para as demais temps.
                      lcd.setCursor(12,0);
                      lcd.print(tempSet);
                      lcd.setCursor(14,0);
-                     lcd.write(1); //Escreve o simbolo de grau
+                     lcd.write(1);
                      lcd.setCursor(15,0);
                      lcd.print("C");
                 }
@@ -332,13 +334,13 @@ void loop(){
         if(tempEXT>tempSet){
             if(relayControl==true){
                 digitalWrite(relay,relayON);
-                Serial.print("ralay on \n");
+                Serial.print("Relay Ativado\n");
                 relayControl=false;
             }
         }else{
             if(relayControl==false){
                 digitalWrite(relay,relayOFF);
-                Serial.print("ralay off \n");
+                Serial.print("Relay Desativado\n");
                 relayControl=true;
             }
         }
