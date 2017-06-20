@@ -22,17 +22,21 @@
 //Variáveis de Controle
     bool porta = false;
     bool relayControl = true;
+    bool erro=false;
+    bool respErro = true;
     float tempEXT = 0;
     int relayON, relayOFF;
     int relayTipo = 1;
-    int tempSet = -9;
-    int menu= 1;
     int b1Estado;
     int b2Estado;
+    int menu= 1;
+    int tempSet = -9;
+    int tempMin = -15;
+    int tempMax = 20;
 
 
 //Array que desenha o simbolo de grau
-    byte a[8]= {B00110,B01001,B00110,B00000,B00000,B00000,B00000,B00000}; 
+    byte grau[8]= {B00110,B01001,B00110,B00000,B00000,B00000,B00000,B00000}; 
     byte barra[8] = {B11111,B11111,B11111,B11111,B11111,B11111,B11111,B11111};
 
 void setup(){
@@ -58,7 +62,7 @@ void setup(){
     lcd.setBacklight(HIGH);
     
     //Criando os símbolos para referenciar
-    lcd.createChar(1, a); 
+    lcd.createChar(1, grau); 
     lcd.createChar(2, barra); 
 
     //Definições de Entrada e Saída
@@ -109,34 +113,41 @@ void loop(){
           lcd.print("Porta");
           lcd.setCursor(5,2);
           lcd.print("Aberta!");
+          Serial.print("\nPorta Aberta\n");
           relayControl=true;
           porta=true;
         }
 
+          if(respErro == false){
+            respErro = true;
+            porta=false;
+          }
+          
         //Troca de MENUs
         //Detectando os estados dos botões
-        b1Estado = digitalRead(botao01);
-        b2Estado = digitalRead(botao02);
-
-        //Alternando entre os MENUs
-        if(menu!=1){
-            if(b1Estado == HIGH){
-                menu = 1;
-                Serial.print("Menu 1\n");
-            }
-        }else{
-            if(b2Estado == HIGH){
-                menu = 0;
-                Serial.print("Menu 0\n");
-            }
+        if(erro==false){
+            b1Estado = digitalRead(botao01);
+            b2Estado = digitalRead(botao02);
+    
+            //Alternando entre os MENUs
+              if(menu!=1){
+                  if(b1Estado == HIGH){
+                      menu = 1;
+                      Serial.print("Menu 1 (MENU Apres.) Selecionado\n\n");
+                  }
+              }else{
+                  if(b2Estado == HIGH){
+                      menu = 0;
+                      Serial.print("Menu 0 (MENU Config.) Selecionado\n\n");
+                  }
+              }
         }
-       
     }else{     //Caso: Porta Fechada
-        if(porta==true){
+        if(porta==true && erro==false){
           
          lcd.clear();
          
-         if(menu==0){     //MENU de Apresentação (MENU 0)     
+         if(menu==0 ){     //MENU de Apresentação (MENU 0)     
              //Escrevendo o Primeiro Setor
              lcd.setCursor(0,0);
              lcd.print("Temp:");
@@ -212,11 +223,26 @@ void loop(){
                    tempEXT = dht.readTemperature();
 
                    if (isnan(tempEXT)) {     //Em caso de Falha do Sensor DHT
-                       Serial.println("Falha ao Ler o Sensor DHT!");
-                       lcd.setCursor(0,0);
-                       lcd.print("Ferrou!");
-                       return;
+                       erro = true;
+                       if(respErro==true){
+                           digitalWrite(relay,relayOFF);
+                           Serial.println("\n\nFalha ao Ler o Sensor DHT!\n\n");
+                           lcd.clear();
+                           lcd.setCursor(0,0);
+                           lcd.print("Falha no Sensor:");
+                           lcd.setCursor(5,1);
+                           lcd.print("*DHT11");
+                           relayControl=true;
+                           respErro = false;
+                           return;
+                       }
                    }else{     //Funcionamento Normal
+                       if(respErro==false){
+                          lcd.clear();
+                          respErro = true;
+                          erro = false;
+                       }
+                       
                        Serial.print("Temperatura: ");
                        Serial.print(tempEXT);
                        Serial.print(" ºC\n");
@@ -256,81 +282,86 @@ void loop(){
   
        if(b1Estado == HIGH){
              if(menu==0){
-                Serial.print("Botao 01 -> Temp. Padrao Reduzida\n");
-                tempSet--;
-                if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
-                     lcd.setCursor(12,0);
-                     lcd.print(" ");
-                     lcd.setCursor(13,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");   
-                }else if(tempSet<-9){     //Para temps. menores que -10 
-                     lcd.setCursor(11,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
-                }else{     //Para as demais temps.
-                     lcd.setCursor(12,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
+                if(tempSet!=tempMin){
+                    Serial.print("Botao 01 -> Temp. Padrao Reduzida\n");
+                    tempSet--;
+                    if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
+                         lcd.setCursor(12,0);
+                         lcd.print(" ");
+                         lcd.setCursor(13,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");   
+                    }else if(tempSet<-9){     //Para temps. menores que -10 
+                         lcd.setCursor(11,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }else{     //Para as demais temps.
+                         lcd.setCursor(12,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }
+                     lcd.setCursor(12,1);
+                     lcd.print("<  >");
+                     delay(200);
                 }
-                 lcd.setCursor(12,1);
-                 lcd.print("<  >");
-                 delay(200);
              }
        }
   
        if(b2Estado == HIGH ){
              if(menu==0){
-                Serial.print("Botao 02 -> Temp. Padrao Aumentada\n");
-                tempSet++;
-                if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
-                     lcd.setCursor(12,0);
-                     lcd.print(" ");   
-                     lcd.setCursor(13,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
-                }else if(tempSet>=-9 && tempSet<0){     //Para temps. de -9 a -1
-                     lcd.setCursor(11,0);
-                     lcd.print(" ");   
-                     lcd.setCursor(12,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
-                }else if(tempSet<=-10){     //Para temps. menores que -10 
-                     lcd.setCursor(11,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
-                }else{     //Para as demais temps.
-                     lcd.setCursor(12,0);
-                     lcd.print(tempSet);
-                     lcd.setCursor(14,0);
-                     lcd.write(1);
-                     lcd.setCursor(15,0);
-                     lcd.print("C");
-                }
-                 lcd.setCursor(12,1);
-                 lcd.print("<  >");
-                 delay(200);
+               if(tempSet!=tempMax){
+                    Serial.print("Botao 02 -> Temp. Padrao Aumentada\n");
+                    tempSet++;
+                    if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
+                         lcd.setCursor(12,0);
+                         lcd.print(" ");   
+                         lcd.setCursor(13,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }else if(tempSet>=-9 && tempSet<0){     //Para temps. de -9 a -1
+                         lcd.setCursor(11,0);
+                         lcd.print(" ");   
+                         lcd.setCursor(12,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }else if(tempSet<=-10){     //Para temps. menores que -10 
+                         lcd.setCursor(11,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }else{     //Para as demais temps.
+                         lcd.setCursor(12,0);
+                         lcd.print(tempSet);
+                         lcd.setCursor(14,0);
+                         lcd.write(1);
+                         lcd.setCursor(15,0);
+                         lcd.print("C");
+                    }
+                     lcd.setCursor(12,1);
+                     lcd.print("<  >");
+                     delay(200);
+                 }
              }
         }
 
+        //Controle do Relay
         if(tempEXT>tempSet){
             if(relayControl==true){
                 digitalWrite(relay,relayON);
