@@ -39,9 +39,6 @@
     int tempMax = 20;
     int tempoBipPorta = 25000;
 
-
-
-
 //Array que desenha o simbolo de grau
     byte grau[8]= {B00110,B01001,B00110,B00000,B00000,B00000,B00000,B00000}; 
     byte barra[8] = {B11111,B11111,B11111,B11111,B11111,B11111,B11111,B11111};
@@ -147,7 +144,6 @@ void loop(){
             porta=false;
           }
 
-          
           if(erro==false){
             if(controleBipPorta==true){
               if(millis()-tempoPorta>tempoBipPorta){
@@ -165,7 +161,6 @@ void loop(){
                     delay(200);
                     digitalWrite(buzzer, LOW);
                     delay(200);
-                    
             }
           }
 
