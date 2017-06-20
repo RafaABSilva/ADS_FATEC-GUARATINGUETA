@@ -1,5 +1,6 @@
 //Mirillis
     long tempo=millis();
+    long tempoPorta=millis();
     bool controle=false;
 
 //DHT 
@@ -18,8 +19,10 @@
     int botao02 = 12;
     int relay = 10;
     int sensorO = 9;
+    int buzzer = 11;
 
 //Variáveis de Controle
+    bool bipPorta = true;
     bool porta = false;
     bool relayControl = true;
     bool erro=false;
@@ -30,6 +33,7 @@
     int b1Estado;
     int b2Estado;
     int menu= 1;
+    int tempoParaBip = 10000;
     int tempSet = -9;
     int tempMin = -15;
     int tempMax = 20;
@@ -70,7 +74,7 @@ void setup(){
     pinMode(botao02, INPUT);
     pinMode(sensorO, INPUT);
     pinMode(relay, OUTPUT);
-
+    pinMode(buzzer, OUTPUT);
    
     if(menu==0){      //Menu de Config. (MENU 0)
         //Escrevendo o primeiro Setor
@@ -89,6 +93,7 @@ void setup(){
         lcd.setCursor(8,1);
         lcd.write(2);
 
+        //Escrevendo o segundo Setor
         lcd.setCursor(2,0);
         lcd.print("Temperatura:");
         lcd.setCursor(6,1);
@@ -97,7 +102,7 @@ void setup(){
         lcd.write(1); //Escreve o simbolo de grau
         lcd.setCursor(9,1);
         lcd.print("C ");  
-}
+    }
 }
 void loop(){
     //Verificando Sensor da Porta
@@ -121,6 +126,20 @@ void loop(){
             respErro = true;
             porta=false;
           }
+
+          if(erro==false){
+              if(bipPorta==true){
+                 if(millis()-tempoPorta>tempoParaBip){
+                      bipPorta=false;
+                      tempoPorta=millis();
+                 }
+              }else{
+                 digitalWrite(buzzer,HIGH);
+                 delay(350);
+                 digitalWrite(buzzer,LOW);
+                 delay(350);
+              }
+          }
           
         //Troca de MENUs
         //Detectando os estados dos botões
@@ -143,7 +162,9 @@ void loop(){
         }
     }else{     //Caso: Porta Fechada
         if(porta==true && erro==false){
-          
+          if(bipPorta==false){
+             bipPorta=true;
+          }
          lcd.clear();
          
          if(menu==0 ){     //MENU de Config. (MENU 0)     
