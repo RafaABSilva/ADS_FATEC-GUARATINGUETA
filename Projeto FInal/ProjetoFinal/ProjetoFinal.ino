@@ -1,6 +1,5 @@
 //Mirillis
     long tempo=millis();
-    long tempoPorta=millis();
     bool controle=false;
 
 //DHT 
@@ -19,10 +18,8 @@
     int botao02 = 12;
     int relay = 10;
     int sensorO = 9;
-    int buzzer = 11;
 
 //Variáveis de Controle
-    bool bipPorta = true;
     bool porta = false;
     bool relayControl = true;
     bool erro=false;
@@ -33,7 +30,6 @@
     int b1Estado;
     int b2Estado;
     int menu= 1;
-    int tempoParaBip = 10000;
     int tempSet = -9;
     int tempMin = -15;
     int tempMax = 20;
@@ -74,7 +70,6 @@ void setup(){
     pinMode(botao02, INPUT);
     pinMode(sensorO, INPUT);
     pinMode(relay, OUTPUT);
-    pinMode(buzzer, OUTPUT);
    
     if(menu==0){      //Menu de Config. (MENU 0)
         //Escrevendo o primeiro Setor
@@ -127,20 +122,6 @@ void loop(){
             porta=false;
           }
 
-          if(erro==false){
-              if(bipPorta==true){
-                 if(millis()-tempoPorta>tempoParaBip){
-                      bipPorta=false;
-                      tempoPorta=millis();
-                 }
-              }else{
-                 digitalWrite(buzzer,HIGH);
-                 delay(350);
-                 digitalWrite(buzzer,LOW);
-                 delay(350);
-              }
-          }
-          
         //Troca de MENUs
         //Detectando os estados dos botões
         if(erro==false){
@@ -162,9 +143,7 @@ void loop(){
         }
     }else{     //Caso: Porta Fechada
         if(porta==true && erro==false){
-          if(bipPorta==false){
-             bipPorta=true;
-          }
+
          lcd.clear();
          
          if(menu==0 ){     //MENU de Config. (MENU 0)     
@@ -261,7 +240,7 @@ void loop(){
                           respErro = true;
                           erro = false;
                        }
-                       
+                     
                        Serial.print("Temperatura: ");
                        Serial.print(tempEXT);
                        Serial.print(" ºC\n");
