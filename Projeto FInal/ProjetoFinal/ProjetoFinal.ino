@@ -510,13 +510,13 @@ void loop(){
         if(tempEXT>tempSet){
             if(relayControl==true){
                 digitalWrite(relay,relayON);
-                Serial.print("Relay Ativado\n");
+                Serial.print("\n\nRelay Ativado\n\n");
                 relayControl=false;
             }
         }else{
             if(relayControl==false){
                 digitalWrite(relay,relayOFF);
-                Serial.print("Relay Desativado\n");
+                Serial.print("\n\nRelay Desativado\n\n");
                 relayControl=true;
             }
         }
