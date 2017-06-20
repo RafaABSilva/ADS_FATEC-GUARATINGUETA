@@ -1,6 +1,8 @@
 //Mirillis
     long tempo=millis();
+    long tempoPorta=millis();
     bool controle=false;
+    bool controlePorta=false;
 
 //DHT 
     #include "DHT.h"
@@ -18,12 +20,14 @@
     int botao02 = 12;
     int relay = 10;
     int sensorO = 9;
-
+    int buzzer = 11; 
+    
 //Variáveis de Controle
     bool porta = false;
     bool relayControl = true;
     bool erro=false;
     bool respErro = true;
+    bool controleBipPorta=true;
     float tempEXT = 0;
     int relayON, relayOFF;
     int relayTipo = 1;
@@ -33,6 +37,9 @@
     int tempSet = -9;
     int tempMin = -15;
     int tempMax = 20;
+    int tempoBipPorta = 25000;
+
+
 
 
 //Array que desenha o simbolo de grau
@@ -70,7 +77,8 @@ void setup(){
     pinMode(botao02, INPUT);
     pinMode(sensorO, INPUT);
     pinMode(relay, OUTPUT);
-   
+    pinMode(buzzer, OUTPUT);
+    
     if(menu==0){      //Menu de Config. (MENU 0)
         //Escrevendo o primeiro Setor
         lcd.setCursor(0,0);
@@ -89,6 +97,17 @@ void setup(){
         lcd.write(2);
 
         //Escrevendo o segundo Setor
+         lcd.setCursor(12,0);
+         lcd.print(tempSet);
+         lcd.setCursor(14,0);
+         lcd.write(1);
+         lcd.setCursor(15,0);
+         lcd.print("C");
+         
+         lcd.setCursor(12,1);
+         lcd.print("<  >");
+         
+    }else{ //Menu de Apres. (MENU 1)
         lcd.setCursor(2,0);
         lcd.print("Temperatura:");
         lcd.setCursor(6,1);
@@ -100,6 +119,12 @@ void setup(){
     }
 }
 void loop(){
+      if(erro==true){
+        controlePorta=false;
+        controleBipPorta=true;
+        tempoPorta=millis();
+      }
+      
     //Verificando Sensor da Porta
     int acionamento = digitalRead(sensorO);
 
@@ -120,6 +145,28 @@ void loop(){
           if(respErro == false){
             respErro = true;
             porta=false;
+          }
+
+          
+          if(erro==false){
+            if(controleBipPorta==true){
+              if(millis()-tempoPorta>tempoBipPorta){
+                  if(controlePorta==false){
+                      controlePorta=true;
+                      controleBipPorta=false;
+                  }else{
+                      controlePorta=false;
+                  }
+                  tempoPorta=millis();
+              }
+            }else{
+              Serial.print("Aviso de Porta Aberta!\n\n");
+                    digitalWrite(buzzer, HIGH);
+                    delay(200);
+                    digitalWrite(buzzer, LOW);
+                    delay(200);
+                    
+            }
           }
 
         //Troca de MENUs
@@ -143,7 +190,7 @@ void loop(){
         }
     }else{     //Caso: Porta Fechada
         if(porta==true && erro==false){
-
+          
          lcd.clear();
          
          if(menu==0 ){     //MENU de Config. (MENU 0)     
@@ -215,11 +262,16 @@ void loop(){
              porta=false;
          }
         }
-
+        
+          if(controleBipPorta==false){
+            controlePorta=false;
+            controleBipPorta=true;
+          }
+          
         //Monitorando a temperatura
         if(millis()-tempo>200){
               if(controle==false){
-                   tempEXT = dht.readTemperature();
+                   tempEXT = dht.readTemperature();;
 
                    if (isnan(tempEXT)) {     //Em caso de Falha do Sensor DHT
                        erro = true;
@@ -233,6 +285,7 @@ void loop(){
                            lcd.print("*DHT11");
                            relayControl=true;
                            respErro = false;
+                           controleBipPorta=false;    
                        }
                    }else{     //Funcionamento Normal
                        if(respErro==false || erro==true){
@@ -246,25 +299,124 @@ void loop(){
                        Serial.print(" ºC\n");
 
                        //Atualizando a temp no LCD
-                       if(menu==0){
+                       if(menu==0){ 
+                            //Escrevendo o Primeiro Setor
                            lcd.setCursor(0,0);
                            lcd.print("Temp:");
-                           lcd.setCursor(0,1);
-                           lcd.print(tempEXT);
-                           lcd.setCursor(2,1);
-                           lcd.write(1);
-                           lcd.setCursor(3,1);
-                           lcd.print("C ");
+                                 
+                           if(tempEXT<10 && tempEXT>=0){     //Para temps. de 0 a 9
+                                 lcd.setCursor(0,1);
+                                 lcd.print(" "); 
+                                 lcd.setCursor(1,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(2,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(3,1);
+                                 lcd.print("C  ");
+                           }else if(tempEXT>=-9 && tempEXT<0){     //Para temps. de -1 a -9  
+                                 lcd.setCursor(0,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(2,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(3,1);
+                                 lcd.print("C  ");
+                           }else if(tempEXT<=-10){     //Para temps. menores que -10 
+                                 lcd.setCursor(0,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(3,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(4,1);
+                                 lcd.print("C  ");
+                            }else{     //Para as demais temps.
+                                 lcd.setCursor(0,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(2,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(3,1);
+                                 lcd.print("C  ");
+                           }
+                            
+                           //Escreve as barras
+                           lcd.setCursor(8,0);
+                           lcd.write(2);
+                           lcd.setCursor(8,1);
+                           lcd.write(2);
+              
+                           //Adequação da interface com base na temperatura padrão
+                           if(tempSet<10 && tempSet>=0){     //Para temps. de 0 a 9
+                                lcd.setCursor(12,0);
+                                lcd.print(" ");   
+                                lcd.setCursor(13,0);
+                                lcd.print(tempSet);
+                                lcd.setCursor(14,0);
+                                lcd.write(1);
+                                lcd.setCursor(15,0);
+                                lcd.print("C");
+                           }else if(tempSet>=-9 && tempSet<0){     //Para temps. de -1 a -9
+                                lcd.setCursor(11,0);
+                                lcd.print(" ");   
+                                lcd.setCursor(12,0);
+                                lcd.print(tempSet);
+                                lcd.setCursor(14,0);
+                                lcd.write(1);
+                                lcd.setCursor(15,0);
+                                lcd.print("C");
+                           }else if(tempSet<=-10){     //Para temps. menores que -10 
+                                lcd.setCursor(11,0);
+                                lcd.print(tempSet);
+                                lcd.setCursor(14,0);
+                                lcd.write(1);
+                                lcd.setCursor(15,0);
+                                lcd.print("C");
+                           }else{     //Para as demais temps.
+                                lcd.setCursor(12,0);
+                                lcd.print(tempSet);
+                                lcd.setCursor(14,0);
+                                lcd.write(1);
+                                lcd.setCursor(15,0);
+                                lcd.print("C");
+                           }
+              
+                           lcd.setCursor(12,1);
+                           lcd.print("<  >");
                            controle=true;
                        }else{
-                           lcd.setCursor(2,0);
-                           lcd.print("Temperatura:");
-                           lcd.setCursor(6,1);
-                           lcd.print(tempEXT);
-                           lcd.setCursor(8,1);
-                           lcd.write(1);
-                           lcd.setCursor(9,1);
-                           lcd.print("C ");
+                            lcd.setCursor(2,0);
+                            lcd.print("Temperatura:");
+                                 
+                            if(tempEXT<10 && tempEXT>=0){     //Para temps. de 0 a 9
+                                 lcd.setCursor(6,1);
+                                 lcd.print(" "); 
+                                 lcd.setCursor(7,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(8,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(9,1);
+                                 lcd.print("C  ");
+                            }else if(tempEXT>=-9 && tempEXT<0){     //Para temps. de -1 a -9
+                                 lcd.setCursor(5,1);
+                                 lcd.print(" ");   
+                                 lcd.setCursor(6,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(8,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(9,1);
+                                 lcd.print("C  ");
+                            }else if(tempEXT<=-10){     //Para temps. menores que -10 
+                                 lcd.setCursor(5,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(8,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(9,1);
+                                 lcd.print("C  ");
+                            }else{     //Para as demais temps.
+                                 lcd.setCursor(6,1);
+                                 lcd.print(tempEXT);
+                                 lcd.setCursor(8,1);
+                                 lcd.write(1);
+                                 lcd.setCursor(9,1);
+                                 lcd.print("C  ");
+                            }
                            controle=true;
                        }
                   }
@@ -373,5 +525,11 @@ void loop(){
                 relayControl=true;
             }
         }
+    }
+    if(erro==true){
+       digitalWrite(buzzer, HIGH);
+       delay(800);
+       digitalWrite(buzzer, LOW);
+       delay(200);
     }
  }
