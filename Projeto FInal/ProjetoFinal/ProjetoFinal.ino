@@ -95,13 +95,12 @@ void setup(){
         lcd.setCursor(9,1);
         lcd.print("C ");  
 }
- 
+}
 void loop(){
     //Verificando Sensor da Porta
     int acionamento = digitalRead(sensorO);
 
-    //Caso: Porta Aberta
-    if(acionamento == HIGH){
+    if(acionamento == HIGH){     //Caso: Porta Aberta
         if(porta==false){    //Controle de Repetição
           digitalWrite(relay,relayOFF);
           delay(100);
@@ -119,7 +118,7 @@ void loop(){
         b1Estado = digitalRead(botao01);
         b2Estado = digitalRead(botao02);
 
-        
+        //Alternando entre os MENUs
         if(menu!=1){
             if(b1Estado == HIGH){
                 menu = 1;
@@ -132,55 +131,59 @@ void loop(){
             }
         }
        
-    }else{
+    }else{     //Caso: Porta Fechada
         if(porta==true){
+          
          lcd.clear();
-         if(menu==0){
-                  
+         
+         if(menu==0){     //MENU de Apresentação (MENU 0)     
+             //Escrevendo o Primeiro Setor
              lcd.setCursor(0,0);
              lcd.print("Temp:");
              lcd.setCursor(0,1);
              lcd.print("--");
              lcd.setCursor(2,1);
-             lcd.write(1); //Escreve o simbolo de grau
+             lcd.write(1);
              lcd.setCursor(3,1);
              lcd.print("C ");
-             
+
+             //Escreve as barras
              lcd.setCursor(8,0);
-             lcd.write(2); //Escreve as barras
+             lcd.write(2);
              lcd.setCursor(8,1);
-             lcd.write(2); //Escreve as barras
-        
-             if(tempSet<10 && tempSet>=0){
+             lcd.write(2);
+
+             //Adequação da interface com base na temperatura padrão
+             if(tempSet<10 && tempSet>=0){     //Para temps de 0 a 9
                   lcd.setCursor(12,0);
                   lcd.print(" ");   
                   lcd.setCursor(13,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
-                  lcd.write(1); //Escreve o simbolo de grau
+                  lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else if(tempSet>=-9 && tempSet<0){
+             }else if(tempSet>=-9 && tempSet<0){     //Para temps de 0 a 9
                   lcd.setCursor(11,0);
                   lcd.print(" ");   
                   lcd.setCursor(12,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
-                  lcd.write(1); //Escreve o simbolo de grau
+                  lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else if(tempSet<=-10){ 
+             }else if(tempSet<=-10){     //Para temps menores que -10 
                   lcd.setCursor(11,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
-                  lcd.write(1); //Escreve o simbolo de grau
+                  lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
-             }else{
+             }else{     //Para as demais temps
                   lcd.setCursor(12,0);
                   lcd.print(tempSet);
                   lcd.setCursor(14,0);
-                  lcd.write(1); //Escreve o simbolo de grau
+                  lcd.write(1);
                   lcd.setCursor(15,0);
                   lcd.print("C");
              }
@@ -188,19 +191,22 @@ void loop(){
              lcd.setCursor(12,1);
              lcd.print("<  >");
              porta=false;
-         }else{
+             
+         }else{     //MENU de Apresentação (MENU 0)
+             //Escrevendo o Segundo Setor
              lcd.setCursor(2,0);
              lcd.print("Temperatura:");
              lcd.setCursor(6,1);
              lcd.print("--");
              lcd.setCursor(8,1);
-             lcd.write(1); //Escreve o simbolo de grau
+             lcd.write(1);
              lcd.setCursor(9,1);
              lcd.print("C ");
              porta=false;
          }
         }
 
+        //Monitorando a temperatura
         if(millis()-tempo>200){
               if(controle==false){
                    tempEXT = dht.readTemperature();
